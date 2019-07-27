@@ -1,0 +1,111 @@
+<template>
+    <div>
+      <div class="navigation">
+         <span v-for="(item, index) in navItems" @click="navChange(index)">
+          <em> {{item.text}} </em>   
+         </span>
+    </div>     
+    <div class="content">
+        <div class="main">
+          <div class="item" v-for="item in orderAllItem[tabIndex]">
+           <div class="title">
+            <span class="id">订单号：{{item.goodsName}}</span>
+            
+            <span class="status" >{{item.status}}</span>
+           </div>
+         </div>
+           </div>
+     </div> 
+    </div>
+</template>
+<script>
+import axios from 'axios'
+import qs from 'qs'
+ var _default = (function(){
+ var navs = [
+  {
+   'text': '全部订单', 
+  },
+  {
+   'text': '待付款',
+  },
+  {
+   'text': '待收货',
+  },   
+  {
+   'text': '待归还',
+  },
+  {
+   'text': '已完成',
+  }
+ ];
+ var orders= [];
+ return {
+  name: 'index',
+  mounted: function(){
+  
+        var _this=this
+         axios.get('/api/order/getorders').then(function(res){  
+           var result = JSON.stringify(res.data.data);// 转成JSON对象
+           orders=result
+          console.log("sdsfsfsdfffffffffffff")
+          console.log(orders)
+      })
+ 
+  },
+  destoryed: function(){
+
+  },
+  data: function(){
+      var _this=this
+   //待付款
+   var paymentsItem = [];
+   //待收货
+   var receiptsItem = [];
+   //待归还
+   var returnsItem = [];
+   //已完成
+   var completesItem = [];
+    console.log("-----------sdsdsdas--------------------")
+  console.log(orders)
+   //把所有不同状态的订单通过if判断push到相对应的订单状态集合中。
+   orders.forEach(function(order){
+    if(order.status == 0){
+     paymentsItem.push(order);
+    };
+    if(order.status == 3){
+     receiptsItem.push(order);
+    };
+    if(order.status == 5){
+     returnsItem.push(order);
+    };
+    if(order.status == 13){
+     completesItem.push(order);
+    }
+   });
+   //设置一个空数组，把所有状态下的订单集合放到空数组中，从0-5的顺序按照你的自己设置的tab切换的内容0-5的顺序对应排列，
+   var orderAll = [ orders, paymentsItem, receiptsItem, returnsItem, completesItem];
+   console.log(orderAll);
+   return {
+    navItems : navs,
+    //全部订单分类的集合
+    orderAllItem : orderAll,
+    //设置
+    tabIndex : 0,
+   };
+  },
+  methods: {
+   navChange: function (e, index){
+
+    this.tabIndex = index;
+//    console.log(this.tabIndex)
+   }
+  }
+ }
+})();
+
+export default _default;
+ 
+ 
+ 
+</script>
